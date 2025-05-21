@@ -5,8 +5,25 @@ const Participant = require('../models/Participant');
 // Get all participants
 router.get('/', async (req, res) => {
   try {
-    const participants = await Participant.find().sort({ createdAt: -1 });
-    res.json(participants);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 8;
+    const skip = (page - 1) * limit;
+
+    const [participants, total] = await Promise.all([
+      Participant.find()
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Participant.countDocuments()
+    ]);
+
+    res.json({
+      participants,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+      itemsPerPage: limit
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
