@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Participant = require('../models/Participant');
+const { sendWelcomeEmail } = require('../helpers/emailHelper');
 
 // Get all participants
 router.get('/', async (req, res) => {
@@ -45,6 +46,15 @@ router.post('/', async (req, res) => {
 
   try {
     const newParticipant = await participant.save();
+    
+    // Send welcome email
+    try {
+      await sendWelcomeEmail(newParticipant);
+    } catch (emailError) {
+      console.error('Failed to send welcome email:', emailError);
+      // Continue with the response even if email fails
+    }
+    
     res.status(201).json(newParticipant);
   } catch (err) {
     res.status(400).json({ message: err.message });
