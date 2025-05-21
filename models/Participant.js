@@ -1,50 +1,68 @@
 const mongoose = require('mongoose');
 
 const participantSchema = new mongoose.Schema({
-  nom: {
+  // Informations personnelles
+  nom: { type: String, required: true },
+  prenom: { type: String, required: true },
+  telephone: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  profession: { type: String, required: true },
+  villeResidence: { type: String, required: true },
+
+  // Projet immobilier
+  typeBienRecherche: {
     type: String,
-    required: true,
+    enum: ['Appartement', 'Villa', 'Terrain', 'Local commercial', 'Autre'],
+    required: true
   },
-  prenom: {
+  typeBienRechercheAutre: { type: String },
+  
+  typeServiceRecherche: {
     type: String,
-    required: true,
+    enum: [
+      'Achat d\'un bien',
+      'Construction clé en main',
+      'Étude de projet',
+      'Réaménagement / rénovation',
+      'Autre'
+    ],
+    required: true
   },
-  email: {
+  typeServiceRechercheAutre: { type: String },
+
+  statutProjet: {
     type: String,
-    required: true,
-    unique: true,
+    enum: ['En réflexion', 'Recherche active'],
+    required: true
   },
-  telephone: {
+  delaiAchat: {
     type: String,
-    required: true,
-    unique: true,
+    enum: ['< 3 mois', '3-6 mois', '> 6 mois', null],
+    default: null
   },
-  AdressePostale:{
+  localisationSouhaitee: { type: String, required: true },
+
+  budget: {
     type: String,
-    required: true,
+    enum: ['< 150.000 TND', '150.000 – 250.000 TND', '250.000 – 400.000 TND', '> 400.000 TND', 'À définir'],
+    required: true
   },
-  statusActuel:{
+  budgetDefini: { type: String },
+
+  financement: {
     type: String,
-    enum: ['Propriétaire', 'Locataire','Acheteur','Locataire potentiel',"Autre"],
-    default: '',
+    enum: ['Comptant', 'Crédit bancaire', 'En cours de demande', 'Facilité de paiement'],
+    required: true
   },
-  autre : {
+
+  sourceConnaissance: {
     type: String,
-    required: false,
+    enum: ['Réseaux sociaux', 'Recommandation', 'Publicité en ligne', 'Passage sur place', 'Autre'],
+    required: true
   },
-  typeDeBienRecherche:{
-    type: String,
-    enum: ['Appartement', 'Maison', 'Terrain', 'Autre'],
-    default: '',
-  },
-  budget:{
-    type: String,
-    required: false,
-  },
-},
-    {
-        timestamps: true,
-    }
-);
+  sourceConnaissanceAutre: { type: String }
+}, {
+  timestamps: true
+});
 
 module.exports = mongoose.model('Participant', participantSchema); 

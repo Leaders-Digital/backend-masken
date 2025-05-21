@@ -30,32 +30,67 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Create a new participant
-router.post('/', async (req, res) => {
-  const participant = new Participant({
-    nom: req.body.nom,
-    prenom: req.body.prenom,
-    email: req.body.email,
-    telephone: req.body.telephone,
-    AdressePostale: req.body.AdressePostale,
-    statusActuel: req.body.statusActuel,
-    autre: req.body.autre,
-    typeDeBienRecherche: req.body.typeDeBienRecherche,
-    budget: req.body.budget
-  });
-
+// Delete all participants
+router.delete('/all', async (req, res) => {
   try {
-    const newParticipant = await participant.save();
+    await Participant.deleteMany({});
+    res.json({ message: 'Tous les participants ont été supprimés' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Create participant(s)
+router.post('/', async (req, res) => {
+  try {
+    // Check if the request body is an array (bulk creation) or a single object
+    const isBulk = Array.isArray(req.body);
+    const participantsData = isBulk ? req.body : [req.body];
     
-    // Send welcome email
-    try {
-      await sendWelcomeEmail(newParticipant);
-    } catch (emailError) {
-      console.error('Failed to send welcome email:', emailError);
-      // Continue with the response even if email fails
+    // Create and save participants one by one
+    const savedParticipants = [];
+    for (const data of participantsData) {
+      const participant = new Participant({
+        nom: data.nom,
+        prenom: data.prenom,
+        telephone: data.telephone,
+        email: data.email,
+        profession: data.profession,
+        villeResidence: data.villeResidence,
+        typeBienRecherche: data.typeBienRecherche,
+        typeBienRechercheAutre: data.typeBienRechercheAutre,
+        typeServiceRecherche: data.typeServiceRecherche,
+        typeServiceRechercheAutre: data.typeServiceRechercheAutre,
+        statutProjet: data.statutProjet,
+        delaiAchat: data.delaiAchat,
+        localisationSouhaitee: data.localisationSouhaitee,
+        budget: data.budget,
+        budgetDefini: data.budgetDefini,
+        financement: data.financement,
+        sourceConnaissance: data.sourceConnaissance,
+        sourceConnaissanceAutre: data.sourceConnaissanceAutre
+      });
+
+      try {
+        const savedParticipant = await participant.save();
+        savedParticipants.push(savedParticipant);
+        
+        // Send welcome email
+        try {
+          await sendWelcomeEmail(savedParticipant);
+        } catch (emailError) {
+          console.error(`Failed to send welcome email to ${savedParticipant.email}:`, emailError);
+          // Continue with the next participant even if email fails
+        }
+      } catch (saveError) {
+        if (saveError.code === 11000) {
+          throw new Error(`Un participant avec l'email ${data.email} existe déjà`);
+        }
+        throw saveError;
+      }
     }
-    
-    res.status(201).json(newParticipant);
+
+    res.status(201).json(isBulk ? savedParticipants : savedParticipants[0]);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -80,27 +115,32 @@ router.patch('/:id', async (req, res) => {
   try {
     const participant = await Participant.findById(req.params.id);
     if (participant) {
-      // Vérifier si le statusActuel est valide
-      if (req.body.statusActuel && !['Propriétaire', 'Locataire', 'Acheteur', 'Locataire potentiel', 'Autre'].includes(req.body.statusActuel)) {
-        return res.status(400).json({ message: 'Status actuel invalide' });
-      }
-      
-      // Vérifier si le typeDeBienRecherche est valide
-      if (req.body.typeDeBienRecherche && !['Appartement', 'Maison', 'Terrain', 'Autre'].includes(req.body.typeDeBienRecherche)) {
-        return res.status(400).json({ message: 'Type de bien recherché invalide' });
-      }
+      // Update only the fields that are provided
+      const allowedFields = [
+        'nom', 'prenom', 'telephone', 'email', 'profession', 'villeResidence',
+        'typeBienRecherche', 'typeBienRechercheAutre', 'typeServiceRecherche',
+        'typeServiceRechercheAutre', 'statutProjet', 'delaiAchat',
+        'localisationSouhaitee', 'budget', 'budgetDefini', 'financement',
+        'sourceConnaissance', 'sourceConnaissanceAutre'
+      ];
 
-      Object.keys(req.body).forEach(key => {
-        participant[key] = req.body[key];
+      allowedFields.forEach(field => {
+        if (req.body[field] !== undefined) {
+          participant[field] = req.body[field];
+        }
       });
-      
+
       const updatedParticipant = await participant.save();
       res.json(updatedParticipant);
     } else {
       res.status(404).json({ message: 'Participant non trouvé' });
     }
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    if (err.code === 11000) {
+      res.status(400).json({ message: 'Un participant avec cet email existe déjà' });
+    } else {
+      res.status(400).json({ message: err.message });
+    }
   }
 });
 
