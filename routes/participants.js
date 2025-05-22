@@ -9,13 +9,16 @@ router.get('/', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 8;
     const skip = (page - 1) * limit;
+    const showWinnersOnly = req.query.winners === 'true';
 
+    const query = showWinnersOnly ? { isWinner: true } : {};
+    
     const [participants, total] = await Promise.all([
-      Participant.find()
+      Participant.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),
-      Participant.countDocuments()
+      Participant.countDocuments(query)
     ]);
 
     res.json({
@@ -121,7 +124,7 @@ router.patch('/:id', async (req, res) => {
         'typeBienRecherche', 'typeBienRechercheAutre', 'typeServiceRecherche',
         'typeServiceRechercheAutre', 'statutProjet', 'delaiAchat',
         'localisationSouhaitee', 'budget', 'budgetDefini', 'financement',
-        'sourceConnaissance', 'sourceConnaissanceAutre'
+        'sourceConnaissance', 'sourceConnaissanceAutre', 'isWinner', 'winDate'
       ];
 
       allowedFields.forEach(field => {
@@ -154,6 +157,68 @@ router.delete('/:id', async (req, res) => {
     } else {
       res.status(404).json({ message: 'Participant non trouvé' });
     }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get today's participants for game
+router.get('/game/today', async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const participants = await Participant.find({
+      createdAt: {
+        $gte: today,
+        $lt: tomorrow
+      }
+    }).sort({ createdAt: -1 });
+
+    res.json({ 
+      participants,
+      date: today.toISOString().split('T')[0]
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get participants by date
+router.get('/game/:date', async (req, res) => {
+  try {
+    const { date } = req.params;
+    const startDate = new Date(date);
+    startDate.setHours(0, 0, 0, 0);
+    
+    const endDate = new Date(date);
+    endDate.setHours(23, 59, 59, 999);
+
+    const [participants, total] = await Promise.all([
+      Participant.find({
+        createdAt: {
+          $gte: startDate,
+          $lte: endDate
+        }
+      }).sort({ createdAt: -1 }),
+      Participant.countDocuments({
+        createdAt: {
+          $gte: startDate,
+          $lte: endDate
+        }
+      })
+    ]);
+
+    res.json({
+      participants,
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: total,
+      itemsPerPage: total
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
