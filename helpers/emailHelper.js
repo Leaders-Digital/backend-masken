@@ -21,7 +21,7 @@ transporter.verify(function(error, success) {
   }
 });
 
-const sendWelcomeEmail = async (participant) => {
+const sendWelcomeEmail = async (participant) => {  
   try {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
       throw new Error('Email configuration is missing. Please check your environment variables.');
@@ -35,7 +35,7 @@ const sendWelcomeEmail = async (participant) => {
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; border: 1px solid #eee; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); background: #fff;">
           <div style="padding: 0; margin: 0;">
             <div style="padding: 24px 0 0 0; text-align: center;">
-              <span style="font-size: 2.2rem; font-weight: bold; color: #1a8cff; letter-spacing: 1px;">masken</span><span style="font-size: 2.2rem; font-weight: bold; color: #e23b6d;">.fr</span>
+              <span style="font-size: 2.2rem; font-weight: bold; color: #1a8cff; letter-spacing: 1px;">masken</span>
             </div>
             <div style="height: 6px; background: linear-gradient(90deg, #1a8cff 0%, #e23b6d 100%); margin: 18px 0 0 0;"></div>
           </div>
@@ -47,7 +47,6 @@ const sendWelcomeEmail = async (participant) => {
               <li><strong>Prénom:</strong> ${participant.prenom}</li>
               <li><strong>Email:</strong> ${participant.email}</li>
               <li><strong>Téléphone:</strong> ${participant.telephone}</li>
-              <li><strong>Type de bien recherché:</strong> ${participant.typeDeBienRecherche}</li>
               <li><strong>Budget:</strong> ${participant.budget}</li>
             </ul>
             <p style="color: #666; font-size: 1rem;">Notre équipe va étudier votre demande et vous contactera dans les plus brefs délais.</p>
