@@ -32,21 +32,31 @@ const sendWelcomeEmail = async (participant) => {
       to: participant.email,
       subject: 'Bienvenue sur notre plateforme',
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #333;">Bienvenue ${participant.prenom} ${participant.nom}!</h2>
-          <p>Merci d'avoir rempli notre formulaire. Nous avons bien reçu vos informations :</p>
-          <ul style="list-style: none; padding: 0;">
-            <li><strong>Nom:</strong> ${participant.nom}</li>
-            <li><strong>Prénom:</strong> ${participant.prenom}</li>
-            <li><strong>Email:</strong> ${participant.email}</li>
-            <li><strong>Téléphone:</strong> ${participant.telephone}</li>
-            <li><strong>Type de bien recherché:</strong> ${participant.typeDeBienRecherche}</li>
-            <li><strong>Budget:</strong> ${participant.budget}</li>
-          </ul>
-          <p>Notre équipe va étudier votre demande et vous contactera dans les plus brefs délais.</p>
-          <p>Cordialement,<br>L'équipe de Masken</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; border: 1px solid #eee; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); background: #fff;">
+          <div style="padding: 0; margin: 0;">
+            <div style="padding: 24px 0 0 0; text-align: center;">
+              <span style="font-size: 2.2rem; font-weight: bold; color: #1a8cff; letter-spacing: 1px;">masken</span><span style="font-size: 2.2rem; font-weight: bold; color: #e23b6d;">.fr</span>
+            </div>
+            <div style="height: 6px; background: linear-gradient(90deg, #1a8cff 0%, #e23b6d 100%); margin: 18px 0 0 0;"></div>
+          </div>
+          <div style="padding: 36px 32px 24px 32px; text-align: center;">
+            <h2 style="font-size: 1.5rem; color: #222; margin-bottom: 18px; font-weight: 600;">Votre confirmation d'inscription à la newsletter,<br>a été prise en compte !</h2>
+            <p style="color: #444; font-size: 1.1rem; margin-bottom: 24px;">Merci d'avoir rempli notre formulaire. Nous avons bien reçu vos informations :</p>
+            <ul style="list-style: none; padding: 0; margin: 0 0 24px 0; text-align: left; display: inline-block;">
+              <li><strong>Nom:</strong> ${participant.nom}</li>
+              <li><strong>Prénom:</strong> ${participant.prenom}</li>
+              <li><strong>Email:</strong> ${participant.email}</li>
+              <li><strong>Téléphone:</strong> ${participant.telephone}</li>
+              <li><strong>Type de bien recherché:</strong> ${participant.typeDeBienRecherche}</li>
+              <li><strong>Budget:</strong> ${participant.budget}</li>
+            </ul>
+            <p style="color: #666; font-size: 1rem;">Notre équipe va étudier votre demande et vous contactera dans les plus brefs délais.</p>
+          </div>
+          <div style="background: #f7f7f7; padding: 18px 32px; text-align: center; color: #888; font-size: 0.98rem; border-top: 1px solid #eee;">
+            Merci pour l'intérêt que vous nous portez,<br>cordialement l'équipe<br><span style="font-weight: bold; color: #1a8cff;">Masken</span>
+          </div>
         </div>
-      `
+      ` // Modern, image-inspired design
     };
 
     const info = await transporter.sendMail(mailOptions);
