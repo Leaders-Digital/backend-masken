@@ -50,7 +50,7 @@ const participantSchema = new mongoose.Schema({
   budgetDefini: { type: String },
 
   financement: {
-    type: String,
+    type: [String],
     enum: ['Comptant', 'Crédit bancaire', 'En cours de demande', 'Facilité de paiement'],
     required: true
   },
