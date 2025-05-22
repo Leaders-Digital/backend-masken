@@ -9,13 +9,16 @@ router.get('/', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 8;
     const skip = (page - 1) * limit;
+    const showWinnersOnly = req.query.winners === 'true';
 
+    const query = showWinnersOnly ? { isWinner: true } : {};
+    
     const [participants, total] = await Promise.all([
-      Participant.find()
+      Participant.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),
-      Participant.countDocuments()
+      Participant.countDocuments(query)
     ]);
 
     res.json({
@@ -121,7 +124,7 @@ router.patch('/:id', async (req, res) => {
         'typeBienRecherche', 'typeBienRechercheAutre', 'typeServiceRecherche',
         'typeServiceRechercheAutre', 'statutProjet', 'delaiAchat',
         'localisationSouhaitee', 'budget', 'budgetDefini', 'financement',
-        'sourceConnaissance', 'sourceConnaissanceAutre'
+        'sourceConnaissance', 'sourceConnaissanceAutre', 'isWinner', 'winDate'
       ];
 
       allowedFields.forEach(field => {

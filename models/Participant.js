@@ -60,7 +60,11 @@ const participantSchema = new mongoose.Schema({
     enum: ['Réseaux sociaux', 'Recommandation', 'Publicité en ligne', 'Passage sur place', 'Autre'],
     required: true
   },
-  sourceConnaissanceAutre: { type: String }
+  sourceConnaissanceAutre: { type: String },
+
+  // Winner status
+  isWinner: { type: Boolean, default: false },
+  winDate: { type: Date }
 }, {
   timestamps: true
 });
