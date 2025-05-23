@@ -70,6 +70,8 @@ router.post('/', async (req, res) => {
         budget: data.budget,
         budgetDefini: data.budgetDefini,
         financement: data.financement,
+        dureePaiement: data.dureePaiement,
+        montantAvance: data.montantAvance,
         sourceConnaissance: data.sourceConnaissance,
         sourceConnaissanceAutre: data.sourceConnaissanceAutre
       });
@@ -134,6 +136,7 @@ router.patch('/:id', async (req, res) => {
         'typeBienRecherche', 'typeBienRechercheAutre', 'typeServiceRecherche',
         'typeServiceRechercheAutre', 'statutProjet', 'delaiAchat',
         'localisationSouhaitee', 'budget', 'budgetDefini', 'financement',
+        'dureePaiement', 'montantAvance',
         'sourceConnaissance', 'sourceConnaissanceAutre', 'isWinner', 'winDate'
       ];
 

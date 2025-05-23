@@ -18,7 +18,7 @@ const participantSchema = new mongoose.Schema({
   typeBienRechercheAutre: { type: String },
   
   typeServiceRecherche: {
-    type: String,
+    type: [String],
     enum: [
       'Achat d\'un bien',
       'Construction clé en main',
@@ -54,6 +54,8 @@ const participantSchema = new mongoose.Schema({
     enum: ['Comptant', 'Crédit bancaire', 'En cours de demande', 'Facilité de paiement'],
     required: true
   },
+  dureePaiement: { type: String },
+  montantAvance: { type: String },
 
   sourceConnaissance: {
     type: String,
