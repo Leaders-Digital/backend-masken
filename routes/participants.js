@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Participant = require('../models/Participant');
-const { sendWelcomeEmail } = require('../helpers/emailHelper');
+const { sendWelcomeEmail, sendWinnerEmail } = require('../helpers/emailHelper');
 
 // Get all participants
 router.get('/', async (req, res) => {
@@ -116,8 +116,18 @@ router.get('/:id', async (req, res) => {
 // Update participant
 router.patch('/:id', async (req, res) => {
   try {
+    console.log('PATCH request received for participant:', req.params.id);
+    console.log('Request body:', req.body);
+
     const participant = await Participant.findById(req.params.id);
     if (participant) {
+      console.log('Found participant:', {
+        id: participant._id,
+        email: participant.email,
+        currentIsWinner: participant.isWinner,
+        newIsWinner: req.body.isWinner
+      });
+
       // Update only the fields that are provided
       const allowedFields = [
         'nom', 'prenom', 'telephone', 'email', 'profession', 'villeResidence',
@@ -134,11 +144,40 @@ router.patch('/:id', async (req, res) => {
       });
 
       const updatedParticipant = await participant.save();
+      console.log('Participant updated successfully');
+
+      // Send winner email if the participant is marked as winner
+      if (req.body.isWinner === true) {
+        console.log('Attempting to send winner email to:', updatedParticipant.email);
+        try {
+          await sendWinnerEmail(updatedParticipant);
+          console.log('Winner email sent successfully');
+        } catch (emailError) {
+          console.error('Failed to send winner email:', {
+            error: emailError.message,
+            code: emailError.code,
+            stack: emailError.stack
+          });
+          // Continue with the response even if email fails
+        }
+      } else {
+        console.log('No winner email needed:', {
+          isWinnerInRequest: req.body.isWinner,
+          wasWinnerBefore: participant.isWinner
+        });
+      }
+
       res.json(updatedParticipant);
     } else {
+      console.log('Participant not found:', req.params.id);
       res.status(404).json({ message: 'Participant non trouvé' });
     }
   } catch (err) {
+    console.error('Error in PATCH route:', {
+      error: err.message,
+      code: err.code,
+      stack: err.stack
+    });
     if (err.code === 11000) {
       res.status(400).json({ message: 'Un participant avec cet email existe déjà' });
     } else {
